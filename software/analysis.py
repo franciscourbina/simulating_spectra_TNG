@@ -8,8 +8,6 @@ import numpy as np
 import pandas as pd
 import os 
 
-
-print('hola')
 def empty_folder(path):
     dir = os.listdir(path) 
     # Checking if the list is empty or not 
