@@ -26,7 +26,7 @@ def list_folders(path):
 
 def spaxel_calc(path_sp, n_side, species):
 
-    path_species= path_sp + "//" + species + "//"
+    path_species= path_sp + "/" + species + "/"
     spectrum_sample = np.loadtxt(path_species + os.listdir(path_species)[0])
     wave = spectrum_sample[:,0]
 
@@ -46,7 +46,7 @@ def spaxel_calc(path_sp, n_side, species):
 
 def qso_spectrum(path_sp, n_side, species):
     
-    path_species= path_sp + "//" + species + "//"
+    path_species= path_sp + "/" + species + "/"
     spectrum_sample = np.loadtxt(path_species + os.listdir(path_species)[0])
     wave = spectrum_sample[:,0]
 
