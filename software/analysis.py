@@ -15,7 +15,7 @@ def empty_folder(path):
     if len(dir) == 0: 
         return True
     else: 
-        False   
+        return False   
 
 def list_folders(path):
     dir = os.listdir(path)
@@ -68,26 +68,26 @@ def qso_spectrum(path_sp, n_side, species):
 def data_cube(path_sim, species, dlambda=0.1, spaxel=True):
 
     strings = path_sim.split('_')
-    deg, sampling, size, id = strings[-1], strings[-2], strings[-3], strings[-5]
+    deg, sampling, size, id = strings[-1].split('/')[-2], strings[-2], strings[-3], strings[-5].split('/')[-1]
     list_dir = list_folders(path_sim)
+
     N_sp = len(list_dir)
     N_side = int(np.sqrt(N_sp))
 
-    N_wave = int(200/dlambda)   # THE WAVELENGTH RANGE HAS TO BE LOWER!! 
-    spectra_matrix = np.zeros((N_wave, N_side, N_side))
+    N_wave = int(200/dlambda) + 1  # THE WAVELENGTH RANGE HAS TO BE LOWER!! 
+    spectra_matrix = np.ones((N_wave, N_side, N_side))
     k = 0
     
     for folder in list_dir:
         if k%10 ==0:
             print('Folders done: {}/{}'.format(k, N_sp))
-
+        
         if not empty_folder(path_sim + folder):
             name, i, j = folder.split('_')
             if spaxel:
                 result = spaxel_calc(path_sim + folder, int(sampling[0]), species)
             else:
                 result = qso_spectrum(path_sim + folder, int(sampling[0]), species)
-
             spectra_matrix[:,int(i),int(j)] = result[1]
         k += 1
     
@@ -97,8 +97,8 @@ def data_cube(path_sim, species, dlambda=0.1, spaxel=True):
         name_map = 'qso'
 
     # In the near future, this should produce a fits file, the header will have all the information needed. 
-    np.save(path_sim + '/spectra_matrix_{}_{}_{}_{}.npy'.format(id, deg, species, name_map) , spectra_matrix)
-    np.save(path_sim + '/wavelength.npy', result[0])
+    np.save(path_sim + 'spectra_matrix_{}_{}_{}_{}.npy'.format(id, deg, species, name_map) , spectra_matrix)
+    np.save(path_sim + 'wavelength.npy', result[0])
 
 
 def measure_EW(rel_flux, dx=0.1):
@@ -106,15 +106,15 @@ def measure_EW(rel_flux, dx=0.1):
     return np.trapz(new_flux, dx=dx)
 
 def compute_EW_map(spectra_matrix, dlambda=0.1, z=1):
-    return np.trapz(spectra_matrix, axis=0, dx=dlambda)/(1+z)
+    return np.trapz(1-spectra_matrix, axis=0, dx=dlambda)/(1+z)
 
 def compute_velocity_statistics(wave, spectra_matrix, reference_wavelenght, dlambda=0.1):
 
-    normalization = np.trapz(wave, 1-spectra_matrix, dx=dlambda, axis=0)
+    normalization = np.trapz( 1-spectra_matrix, dx=dlambda, axis=0)
     c_kms = c/1000
-    mean_wave = np.trapz(wave, (1-spectra_matrix)*wave[:,np.newaxis, np.newaxis], dx=dlambda, axis=0)/normalization
+    mean_wave = np.trapz( (1-spectra_matrix)*wave[:,np.newaxis, np.newaxis], dx=dlambda, axis=0)/normalization
     
-    std_wave = np.sqrt(np.trapz(wave, (1-spectra_matrix)*(wave**2)[:,np.newaxis, np.newaxis], dx=dlambda, axis=0)/normalization - mean_wave**2)
+    std_wave = np.sqrt(np.trapz( (1-spectra_matrix)*(wave**2)[:,np.newaxis, np.newaxis], dx=dlambda, axis=0)/normalization - mean_wave**2)
 
     mean_vel = c_kms * (mean_wave - reference_wavelenght)/reference_wavelenght  
     

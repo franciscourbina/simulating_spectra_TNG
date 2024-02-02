@@ -4,3 +4,6 @@ software/testing_file.py
 software/__pycache__/coordinates.cpython-39.pyc
 software/__pycache__/mock_spaxels.cpython-39.pyc
 software/__pycache__/coordinates.cpython-39.pyc
+arctomo_vel_disp_data.txt
+software/__pycache__/analysis.cpython-39.pyc
+Visual_inspection.ipynb
